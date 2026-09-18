@@ -97,9 +97,7 @@ mkTarget {
       in
       {
         assertions = lib.singleton {
-          assertion = lib.traceValFn (val: "${name}: ${toString val}") (
-            !(cfg.themeExtension.enable && browser.requireSigning)
-          );
+          assertion = !(cfg.themeExtension.enable && browser.requireSigning);
           message = ''
             stylix: `programs.${name}.themeExtension` can only be enabled on browsers that support unsigned extensions.
           '';
