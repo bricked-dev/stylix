@@ -21,6 +21,13 @@ mkTarget {
       default = [ ];
     };
 
+    userCss.enable =
+      lib.mkEnableOption "userChrome.css and userContent.css styles on ${humanName}"
+      // {
+        default = true;
+        example = false;
+      };
+
     themeExtension.enable = lib.mkOption {
       default = false;
       description = ''
@@ -63,6 +70,29 @@ mkTarget {
       });
     })
     (import ./reader-mode.nix { inherit name lib; })
+    (
+      { cfg, colors }:
+      let
+        userChrome = colors {
+          template = ./userChrome.css.mustache;
+          extension = ".css";
+        };
+
+        userContent = colors {
+          template = ./userContent.css.mustache;
+          extension = ".css";
+        };
+      in
+      {
+        programs.${name}.profiles = lib.mkIf cfg.userCss.enable (
+          lib.genAttrs cfg.profileNames (_: {
+            settings."toolkit.legacyUserProfileCustomizations.stylesheets" = true;
+            userChrome = ''@import "${userChrome}";'';
+            userContent = ''@import "${userContent}";'';
+          })
+        );
+      }
+    )
     (
       { cfg, colors }:
       let
